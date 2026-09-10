@@ -1,0 +1,95 @@
+#pragma once
+#include <cstdint>
+#include <concepts>
+#include <type_traits>
+#include <memory>
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
+#include <glm/ext.hpp>
+#include <glm/fwd.hpp>
+#include "Modeling.h"
+// i lov tee
+
+// I have plan: goto goto goto goto "goto" 
+// And 
+// Now: I'll make basic rendering (as rendering objects and shaders)
+// Then: I'll make camera object
+// Then 2: Ill goto: sleep
+namespace Objects
+{
+  class Object 
+  {
+    private:
+    uint32_t _id; // 2 ^ 32 = idk
+    public:
+    uint32_t GetId();
+
+  };
+
+  
+
+  class Component : virtual public Object {
+    public:
+      virtual void Update() = 0; 
+      virtual ~Component() = default;
+  };
+
+  class ComponentManager {
+    private:
+     std::vector<std::unique_ptr<Component>> _components;
+    public:
+    ComponentManager();
+
+     void UpdateAll(){
+       for(auto& i : _components){
+          i->Update();
+       }
+     }
+     template <class T, typename... args>
+     void AddComponent(args&&... arguments){
+       std::cout << "Trying component..." << std::endl;
+        _components.push_back(std::make_unique<T>(std::forward<args>(arguments)...));
+        std::cout << "Success on adding comp" << std::endl;
+     }
+     template <class T>
+     void RemoveComponent(){
+       for(size_t i = 0; i < _components.size(); i++){
+          if(dynamic_cast<T>(_components.at(i).get())){
+            _components.erase(_components.begin() + i);
+            break;
+          }
+       }
+     }
+     template <class T>
+     bool TryComponent(T& out){
+        for(size_t i = 0; i < _components.size(); i++){
+          if(dynamic_cast<T>(_components.at(i).get())){
+            out = _components.at(i);
+            return true;
+          }
+       }
+     };
+  };
+
+  class Spaceable : public Object {
+    private:
+      glm::vec3 _position;
+      glm::quat _rotation; 
+    public: 
+      ComponentManager component_manager = {};
+      std::shared_ptr<Spaceable> parent;
+      void Update(); 
+      Spaceable();
+     
+  };
+  class Renderable : public Component {
+    private:
+      std::unique_ptr<Modeling::Model> _model;
+    public:
+      Renderable();
+      Renderable(Modeling::Model model);
+      Renderable(Modeling::ModelType _type);
+      
+      void Update() override;
+  };
+}

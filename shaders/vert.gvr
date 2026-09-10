@@ -1,0 +1,9 @@
+#version 420 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 _color;
+layout (location = 2) in vec2 _texPos;
+layout (location = 3) in vec3 _Normal;
+
+out vec3 Color;
+
+void main() { gl_Position = vec4(aPos, 0); Color = _color; }
