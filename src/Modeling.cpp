@@ -10,15 +10,15 @@ Modeling::Model Modeling::Make_Model(const Modeling::ModelType& _mod_type)
         glm::vec3 white = glm::vec3(1.0f, 1.0f, 1.0f);      
         verts = {
           // back
-          {{-1,-1,-1}, white, {0,0}}, // back left bottom (0)
-          {{1, -1, -1}, white, {0,0}},// back right bottom (1)
-          {{1, 1, -1}, white, {0,0}}, // back right top (2)
-          {{-1, 1, -1}, white, {0,0}}, // back left top (3)
+          {{-0.25f,-0.25f,-0.25f}, white, {0,0}}, // back left bottom (0)
+          {{0.25f, -0.25f, -0.25f}, white, {0,0}},// back right bottom (1)
+          {{0.25f, 0.25f, -0.25f}, white, {0,0}}, // back right top (2)
+          {{-0.25f, 0.25f, -0.25f}, white, {0,0}}, // back left top (3)
           // front
-          {{-1,-1,1}, white, {0,0}}, // front left bottom (4)
-          {{1, -1, 1}, white, {0,0}},// front right bottom (5)
-          {{1, 1, 1}, white, {0,0}}, // front right top (6)
-          {{-1, 1, 1}, white, {0,0}} // front left top (7)
+          {{-0.25f,-0.25f,0.25f}, white, {0,0}}, // front left bottom (4)
+          {{0.25f, -0.25f, 0.25f}, white, {0,0}},// front right bottom (5)
+          {{0.25f, 0.25f, 0.25f}, white, {0,0}}, // front right top (6)
+          {{-0.25f, 0.25f, 0.25f}, white, {0,0}} // front left top (7)
          };
         indices = {
           4, 5, 6, // front right-side triangle
@@ -65,20 +65,21 @@ Modeling::Model::Model(const std::vector<Modeling::Vertex>& _verts, const std::v
 	glEnableVertexAttribArray(3);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _vertices->size() * sizeof(unsigned int), _indices->data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices->size()*sizeof(unsigned int), _indices->data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
 
 void Modeling::Model::RenderModel(){
-  glUseProgram(_shader->GetShaderID());
   glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, _indices->size(), GL_UNSIGNED_INT, (void*)0);
 	glBindVertexArray(0);
 }
 
+Shaders::Shader* Modeling::Model::GetShader(){
+  return _shader.get();
+}
+
 Modeling::Model::~Model(){
-  glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &EBO);
+  std::cout << "Called destructor" << std::endl;
 }

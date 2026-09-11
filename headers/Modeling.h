@@ -32,6 +32,7 @@ namespace Modeling {
 
       std::shared_ptr<Shaders::Shader> _shader;
     public:
+      Shaders::Shader* GetShader();
     Model(const std::vector<Vertex>& _verts, const std::vector<unsigned int>& indices, const Shaders::Shader& shad);
     void RenderModel();
     ~Model();

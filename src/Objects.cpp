@@ -9,20 +9,22 @@ Objects::Renderable::Renderable(Modeling::Model model) : _model(nullptr){
 }
 
 void Objects::Renderable::Update(){
- _model->RenderModel(); 
-}
-
-
-Objects::ComponentManager::ComponentManager(){
+  glUseProgram(_model->GetShader()->GetShaderID());
+  _model->GetShader()->ChangeUniformValue(Shaders::Uni::Matrix4, &Interface->_parent->_model, "model");
+  _model->RenderModel();
 
 }
-
-Objects::Spaceable::Spaceable(){
-  component_manager = {};
+Objects::Spaceable::Spaceable() : component_manager(nullptr){
+  component_manager = std::make_unique<Objects::ComponentManager>(this);
   _position = {0, 0, 0};
   _rotation = {0, 0, 0, 0};
 }
 
 void Objects::Spaceable::Update(){
- component_manager.UpdateAll(); 
+  _model = glm::mat4(1.0f);
+  _model = glm::translate(_model, _position); 
+  _model = _model * glm::toMat4(_rotation); 
+  _model = glm::scale(_model, _scale); 
+  component_manager->UpdateAll(); 
 }
+

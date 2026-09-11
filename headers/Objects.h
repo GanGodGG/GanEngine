@@ -2,11 +2,15 @@
 #include <cstdint>
 #include <concepts>
 #include <type_traits>
+
 #include <memory>
 #include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/ext.hpp>
 #include <glm/fwd.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 #include "Modeling.h"
 // i lov tee
 
@@ -17,6 +21,7 @@
 // Then 2: Ill goto: sleep
 namespace Objects
 {
+  class ComponentManager;
   class Object 
   {
     private:
@@ -25,31 +30,51 @@ namespace Objects
     uint32_t GetId();
 
   };
-
-  
-
   class Component : virtual public Object {
+    protected:
+      ComponentManager* Interface;
     public:
-      virtual void Update() = 0; 
+      void ChangeComponentInterface(ComponentManager* _interface){
+        Interface = _interface;
+      }
+      virtual void Update() = 0;
       virtual ~Component() = default;
+  };
+  class Spaceable : public Object {
+    public:
+      glm::mat4x4 _model; 
+      glm::quat _rotation; 
+      glm::vec3 _scale;
+      glm::vec3 _position;
+      std::unique_ptr<ComponentManager> component_manager;
+      std::shared_ptr<Spaceable> parent;
+      void Update(); 
+      void Rotate(glm::vec3 rotation);
+      Spaceable();
+     
   };
 
   class ComponentManager {
     private:
      std::vector<std::unique_ptr<Component>> _components;
+    
     public:
-    ComponentManager();
-
-     void UpdateAll(){
+     ComponentManager(Spaceable* spaceable) : _parent(nullptr){
+        _parent.reset(spaceable);  
+     }
+ std::unique_ptr<Spaceable> _parent;
+    void UpdateAll(){
        for(auto& i : _components){
           i->Update();
        }
      }
      template <class T, typename... args>
      void AddComponent(args&&... arguments){
-       std::cout << "Trying component..." << std::endl;
-        _components.push_back(std::make_unique<T>(std::forward<args>(arguments)...));
-        std::cout << "Success on adding comp" << std::endl;
+       static_assert(std::is_base_of_v<Component, T>, "[GANGOD] The component does not inherit from class 'Component'");
+        std::unique_ptr<T> comp = std::make_unique<T>(std::forward<args>(arguments)...);
+        dynamic_cast<Component>(comp).ChangeComponentInterface(this);
+        _components.push_back(comp);
+        
      }
      template <class T>
      void RemoveComponent(){
@@ -71,17 +96,6 @@ namespace Objects
      };
   };
 
-  class Spaceable : public Object {
-    private:
-      glm::vec3 _position;
-      glm::quat _rotation; 
-    public: 
-      ComponentManager component_manager = {};
-      std::shared_ptr<Spaceable> parent;
-      void Update(); 
-      Spaceable();
-     
-  };
   class Renderable : public Component {
     private:
       std::unique_ptr<Modeling::Model> _model;
@@ -89,7 +103,7 @@ namespace Objects
       Renderable();
       Renderable(Modeling::Model model);
       Renderable(Modeling::ModelType _type);
-      
+       
       void Update() override;
   };
 }

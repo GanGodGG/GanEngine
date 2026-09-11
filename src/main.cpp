@@ -28,8 +28,10 @@ int main(int argc, char** argv){
   std::cout << "end..." << std::endl;
   obj.component_manager.AddComponent<Objects::Renderable>(Modeling::Make_Model(Modeling::ModelType::Cube));
   while(!window.MustClose()){
-    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
+    obj._position.x += 1.0f;
+    obj._position.y += 1.0f;
     obj.Update();
     window.Swap();
     glfwPollEvents();

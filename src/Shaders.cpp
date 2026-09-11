@@ -68,3 +68,29 @@ Shaders::Shader::Shader(){
 unsigned int Shaders::Shader::GetShaderID(){
   return SH_ID;
 }
+
+void Shaders::Shader::ChangeUniformValue(Shaders::Uni _type, void* value, const char* field){
+  int uni = glGetUniformLocation(SH_ID, field);
+
+  switch (_type){
+    case Shaders::Uni::Float:
+      glUniform1f(uni, *(float*)value);
+      break;
+    case Shaders::Uni::Vector2:
+      glUniform2fv(uni, 1, &((glm::vec2*)value)->x); // pointer to first value of array in glm vec2
+      break;
+    case Shaders::Uni::Vector3:
+      glUniform3fv(uni, 1, &((glm::vec3*)value)->x);
+      break;
+
+    case Shaders::Uni::Matrix3:{
+      glm::mat3 mat3 = *(glm::mat3*)value;
+      glUniformMatrix3fv(uni, 1, GL_FALSE, &mat3[0][0]);
+      break;
+                               }
+    case Shaders::Uni::Matrix4:
+      glm::mat4 mat4 = *(glm::mat4*)value;
+      glUniformMatrix3fv(uni, 1, GL_FALSE, &mat4[0][0]);
+      break;
+  }
+}
