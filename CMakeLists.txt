@@ -4,7 +4,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 project(IAMGANGOD VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_executable(IAMGANGOD src/main.cpp src/WindowManager.cpp src/Modeling.cpp src/Objects.cpp src/Shaders.cpp)
+add_executable(IAMGANGOD src/main.cpp src/WindowManager.cpp src/Modeling.cpp src/Shaders.cpp)
 
 
 find_package(OpenGL REQUIRED)

@@ -34,6 +34,7 @@ namespace Modeling {
     public:
       Shaders::Shader* GetShader();
     Model(const std::vector<Vertex>& _verts, const std::vector<unsigned int>& indices, const Shaders::Shader& shad);
+    Model(const Model& _cpy);
     void RenderModel();
     ~Model();
   };

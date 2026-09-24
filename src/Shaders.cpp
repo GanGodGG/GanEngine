@@ -61,8 +61,39 @@ Shaders::Shader::Shader(){
 
 	glDeleteShader(vert_Shader);
 	glDeleteShader(frag_Shader);
-  std::cout << "Compiled shaders!" << std::endl;
+  void glBindTexture( 	GLenum target,
+  	GLuint texture);
+  
   // there goes texture path, but no.
+}
+
+Shaders::Shader::Shader(const std::string& image) : Shader() {
+ ChangeTexture(image); 
+}
+
+void Shaders::Shader::ChangeTexture(const std::string& path_){
+    int H, W, C_CH;
+		unsigned char* data = stbi_load(std::filesystem::path(SOURCE_DIRECTORY "/" + path_).c_str(), &W, &H, &C_CH, 0);	
+    glGenTextures(1, &_tex);
+		glBindTexture(GL_TEXTURE_2D, _tex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		if (data) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      GLenum format = GL_RGB;
+      if (C_CH == 1) format = GL_RED;
+      else if (C_CH == 3) format = GL_RGB;
+      else if (C_CH == 4) format = GL_RGBA;
+
+			glTexImage2D(GL_TEXTURE_2D, 0, format, W, H, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else {
+      Logger::log_err("Shaders", "Could not compile current path");	
+		}
+    stbi_image_free(data);  
 }
 
 unsigned int Shaders::Shader::GetShaderID(){
@@ -90,7 +121,13 @@ void Shaders::Shader::ChangeUniformValue(Shaders::Uni _type, void* value, const 
                                }
     case Shaders::Uni::Matrix4:
       glm::mat4 mat4 = *(glm::mat4*)value;
-      glUniformMatrix3fv(uni, 1, GL_FALSE, &mat4[0][0]);
+      glUniformMatrix4fv(uni, 1, GL_FALSE, &mat4[0][0]);
       break;
   }
+}
+
+void Shaders::Shader::Render(){
+  glUniform1i(glGetUniformLocation(SH_ID, "Texture"), 0);
+  glActiveTexture(GL_TEXTURE0); 
+  glBindTexture(GL_TEXTURE_2D, _tex);
 }

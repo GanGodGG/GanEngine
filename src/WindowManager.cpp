@@ -35,3 +35,17 @@ bool gwm::gWindow::MustClose(){
 void gwm::gWindow::Swap(){
   glfwSwapBuffers(_window.get());
 }
+
+float gwm::gWindow::GetAspect(){
+  return (float)_width / _height;
+}
+
+bool gwm::gWindow::GetKeyUp(const keys& key){
+  return glfwGetKey(_window.get(), key) == GLFW_RELEASE; 
+}
+bool gwm::gWindow::GetKeyDown(const keys& key){
+  return glfwGetKey(_window.get(), key) == GLFW_PRESS; 
+}
+bool gwm::gWindow::GetKey(const keys& key){
+  return glfwGetKey(_window.get(), key) == GLFW_PRESS; 
+}
