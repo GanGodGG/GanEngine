@@ -1,24 +1,23 @@
-#include "../headers/Modeling.h"
+#include <gEngine/Modeling.h>
   
-Modeling::Model Modeling::Make_Model(const Modeling::ModelType& _mod_type)
+Modeling::Model Modeling::Make_Model(const Modeling::ModelType& _mod_type, glm::vec3 color)
 {
   std::vector<Modeling::Vertex> verts; 
   std::vector<unsigned int> indices;
   switch(_mod_type){
-    case Modeling::ModelType::Cube:
-      std::cout << "Making cube" << std::endl;
-        glm::vec3 white = glm::vec3(1.0f, 1.0f, 1.0f);      
+    case Modeling::ModelType::Cube:{
+      std::cout << "Making cube" << std::endl; 
         verts = {
           // back
-          {{-0.25f,-0.25f,-0.25f}, white, {1.0f, 0.0f}}, // back left bottom (0)
-          {{0.25f, -0.25f, -0.25f}, white, {0.0f,0.0f}},// back right bottom (1)
-          {{0.25f, 0.25f, -0.25f}, white, {0.0f,1.0f}}, // back right top (2)
-          {{-0.25f, 0.25f, -0.25f}, white, {1.0f,1.0f}}, // back left top (3)
+          {{-0.25f,-0.25f,-0.25f}, color, {1.0f, 0.0f}}, // back left bottom (0)
+          {{0.25f, -0.25f, -0.25f}, color, {0.0f,0.0f}},// back right bottom (1)
+          {{0.25f, 0.25f, -0.25f}, color, {0.0f,1.0f}}, // back right top (2)
+          {{-0.25f, 0.25f, -0.25f}, color, {1.0f,1.0f}}, // back left top (3)
           // front
-          {{-0.25f,-0.25f,0.25f}, white, {0.0f,0.0f}}, // front left bottom (4)
-          {{0.25f, -0.25f, 0.25f}, white, {0.0f,0.0f}},// front right bottom (5)
-          {{0.25f, 0.25f, 0.25f}, white, {0,1.0f}}, // front right top (6)
-          {{-0.25f, 0.25f, 0.25f}, white, {0.0f,0.0f}} // front left top (7)
+          {{-0.25f,-0.25f,0.25f}, color, {0.0f,0.0f}}, // front left bottom (4)
+          {{0.25f, -0.25f, 0.25f}, color, {0.0f,0.0f}},// front right bottom (5)
+          {{0.25f, 0.25f, 0.25f}, color, {0,1.0f}}, // front right top (6)
+          {{-0.25f, 0.25f, 0.25f}, color, {0.0f,0.0f}} // front left top (7)
          };
         indices = {
           4, 5, 6, // front right-side triangle
@@ -40,10 +39,59 @@ Modeling::Model Modeling::Make_Model(const Modeling::ModelType& _mod_type)
           3, 7, 6
         };
       break;
+    }
+    case Modeling::ModelType::Ball:{
+          int stackCount = 64;
+          int sectorCount = 64;
+          float radius = 1.0f;
+          for (uint32_t i = 0; i <= stackCount; ++i) {
+            // stackAngle идёт от +90° (полюс) до -90° (полюс)
+            float stackAngle = glm::pi<float>() / 2.0f - i * (glm::pi<float>() / stackCount);
+            float xy = radius * std::cos(stackAngle); // радиус текущего "кольца"
+            float z  = radius * std::sin(stackAngle);
+
+            for (uint32_t j = 0; j <= sectorCount; ++j) {
+                float sectorAngle = j * (2.0f * glm::pi<float>() / sectorCount);
+
+                float x = xy * std::cos(sectorAngle);
+                float y = xy * std::sin(sectorAngle);
+
+                Vertex v;
+                v.color = color;
+                v.position = {x, y, z};
+                v.normal = glm::normalize(glm::vec3(x, y, z)); // для сферы normal = направление от центра
+                v.uv_position = {
+                    (float)j / sectorCount,
+                    (float)i / stackCount
+                };
+                verts.push_back(v);
+            }
+        }
+ 
+        for (uint32_t i = 0; i < stackCount; ++i) {
+            uint32_t k1 = i * (sectorCount + 1);
+            uint32_t k2 = k1 + sectorCount + 1;
+
+            for (uint32_t j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+                
+                if (i != 0) {
+                    indices.push_back(k1);
+                    indices.push_back(k2);
+                    indices.push_back(k1 + 1);
+                }
+                if (i != (stackCount - 1)) {
+                    indices.push_back(k1 + 1);
+                    indices.push_back(k2);
+                    indices.push_back(k2 + 1);
+                }
+            }
+        }
+     
+                                   }
   }
-  std::cout << "Made cube..." << std::endl;
+  
   Model _model(verts, indices, {});
-  std::cout << "Return model... " << std::endl;
+ 
   return _model;
 }
 

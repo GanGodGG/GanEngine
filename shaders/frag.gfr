@@ -2,10 +2,15 @@
 out vec4 FragColor;
 in vec3 Color;
 in vec2 TexPos;
+
+uniform float global_lightIntense;
+uniform vec3 global_lightColor;
+
 uniform sampler2D Texture;
 void main() 
 { 
-FragColor = texture(Texture, TexPos);
+  vec3 ambient = global_lightIntense * global_lightColor;
+  FragColor = vec4(ambient, 1.0) * (texture(Texture, TexPos) + vec4(Color, 1.0));
 }
 
 

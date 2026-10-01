@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_BUILD_TYPE Debug)
-
-project(IAMGANGOD VERSION 0.1 LANGUAGES CXX)
+project(gEngine VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_executable(IAMGANGOD src/main.cpp src/WindowManager.cpp src/Modeling.cpp src/Shaders.cpp)
-
-
+set(ENGINE_SOURCES src/WindowManager.cpp src/Modeling.cpp src/Shaders.cpp src/Time.cpp)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
+add_library(gEngine STATIC ${ENGINE_SOURCES})
 add_compile_definitions(SOURCE_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_directories(IAMGANGOD PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers)
-target_link_libraries(IAMGANGOD PRIVATE OpenGL::GL GLEW::GLEW glfw)
+target_include_directories(gEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(gEngine PUBLIC OpenGL::GL GLEW::GLEW glfw)
+target_compile_definitions(gEngine PRIVATE VERSION_INFO="${PROJECT_VERSION}")
+
+
+

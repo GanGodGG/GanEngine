@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <memory>
 #include "Shaders.h"
 namespace Modeling {
@@ -38,6 +40,6 @@ namespace Modeling {
     void RenderModel();
     ~Model();
   };
-  Model Make_Model(const ModelType& _mod_type);
+  Model Make_Model(const ModelType& _mod_type, glm::vec3 color);
   Model Make_Model(const std::string& path_to_model);
 } // namespace Modeling

@@ -4,18 +4,8 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include "Component.h"
 namespace Game{
-  class GameObject;
-
-  class Component {
-   public:
-    virtual ~Component() = default;
-    virtual void Update() {}
-    virtual void Awake() {} 
-    GameObject* owner = nullptr; 
-    Component(GameObject* own) : owner(own) {}
-  };
-
   class GameObject{
     private:
       std::vector<std::unique_ptr<Component>> _components;
@@ -28,12 +18,13 @@ namespace Game{
       void AddComponent(args&&... arguments){
         static_assert(std::is_base_of_v<Component, T>, "[GANGOD] The component does not inherit from class 'Component'");
         std::unique_ptr<T> comp = std::make_unique<T>(this, std::forward<args>(arguments)...);  
-        _components.push_back(std::move(comp)); 
+        _components.push_back(std::move(comp));
+        
      }
      template <class T>
      void RemoveComponent(){
        for(size_t i = 0; i < _components.size(); i++){
-          if(dynamic_cast<T>(_components.at(i).get())){
+          if(dynamic_cast<T*>(_components.at(i).get())){
             _components.erase(_components.begin() + i);
             break;
           }
@@ -60,12 +51,20 @@ namespace Game{
        }
         return nullptr; 
      };
-     void Update(){
+     void Update(float dt){
         for(auto& comp : _components){
-          comp->Update();
+          comp->Update(dt);
         }
         for(auto& child : _children){
-          child->Update();
+          child->Update(dt);
+        }
+     }
+     void Awake(){
+        for(auto& comp : _components){
+          comp->Awake();
+        }
+        for(auto& child : _children){
+          child->Awake();
         }
      }
   };
